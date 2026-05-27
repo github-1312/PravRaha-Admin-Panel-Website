@@ -397,6 +397,306 @@
 
 
 
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import {
+//   Loader2,
+//   FileText,
+//   CheckCircle,
+//   XCircle,
+// } from "lucide-react";
+
+// const ApplicationsManagement = () => {
+//   const API_BASE_URL =
+//     import.meta.env.VITE_API_URL || "http://localhost:9077";
+//     //  import.meta.env.VITE_API_URL || 'https://node.encleadus.cloud';
+
+//   const [applications, setApplications] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [processingId, setProcessingId] = useState(null);
+
+//   // ================= FETCH APPLICATIONS =================
+//   const APPLICATIONS_ENDPOINT = `${API_BASE_URL}/api/applications`;
+//   const APPLICATIONS_STATUS_ENDPOINT = `${API_BASE_URL}/api/applications/status`;
+
+//   const fetchApplications = async () => {
+//     try {
+//       setIsLoading(true);
+
+//       const response = await axios.get(APPLICATIONS_ENDPOINT);
+//       const responseData = response.data;
+
+//       const applicationsFromResponse = Array.isArray(responseData)
+//         ? responseData
+//         : Array.isArray(responseData.applications)
+//         ? responseData.applications
+//         : Array.isArray(responseData.data)
+//         ? responseData.data
+//         : [];
+
+//       setApplications(applicationsFromResponse);
+//       setError(null);
+//     } catch (err) {
+//       console.error(err);
+
+//       setApplications([]);
+//       setError(
+//         "Failed to load applications. Please try again later."
+//       );
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchApplications();
+//   }, []);
+
+//   // ================= HANDLE STATUS =================
+//   const handleApplicationStatus = async (
+//     application,
+//     status
+//   ) => {
+//     try {
+//       setProcessingId(application._id);
+
+//       const response = await axios.post(
+//         APPLICATIONS_STATUS_ENDPOINT,
+//         {
+//           applicationId: application._id,
+//           email: application.email,
+//           fullName: application.fullName,
+//           status,
+//         }
+//       );
+
+//       alert(response.data.message);
+
+//       // Dynamic Local Update
+//       setApplications((prev) =>
+//         prev.map((app) =>
+//           app._id === application._id
+//             ? {
+//                 ...app,
+//                 status:
+//                   status === "yes"
+//                     ? "shortlisted"
+//                     : "rejected",
+//               }
+//             : app
+//         )
+//       );
+//     } catch (err) {
+//       console.error(err);
+//       alert("Something went wrong");
+//     } finally {
+//       setProcessingId(null);
+//     }
+//   };
+
+//   // ================= LOADING =================
+//   if (isLoading) {
+//     return (
+//       <div className="flex justify-center items-center h-96">
+//         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+//       </div>
+//     );
+//   }
+
+//   // ================= ERROR =================
+//   if (error) {
+//     return (
+//       <div className="p-6">
+//         <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4">
+//           {error}
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+//       <div className="mb-6">
+//         <h1 className="text-2xl font-bold">
+//           Job Applications
+//         </h1>
+
+//         <p className="text-gray-500">
+//           Review and manage candidate applications
+//         </p>
+//       </div>
+
+//       <div className="bg-white rounded-xl shadow border overflow-hidden">
+//         {applications.length === 0 ? (
+//           <div className="p-10 text-center text-gray-500">
+//             No applications found
+//           </div>
+//         ) : (
+//           <div className="overflow-x-auto">
+//             <table className="w-full border-collapse">
+//               <thead className="bg-gray-100">
+//                 <tr>
+//                   <th className="px-6 py-4 text-left">
+//                     Candidate
+//                   </th>
+
+//                   <th className="px-6 py-4 text-left">
+//                     Contact
+//                   </th>
+
+//                   <th className="px-6 py-4 text-left">
+//                     Position
+//                   </th>
+
+//                   <th className="px-6 py-4 text-left">
+//                     Experience
+//                   </th>
+
+//                   <th className="px-6 py-4 text-left">
+//                     Resume
+//                   </th>
+
+//                   <th className="px-6 py-4 text-center">
+//                     Status
+//                   </th>
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+//                 {applications.map((app) => (
+//                   <tr
+//                     key={app._id}
+//                     className="border-t hover:bg-gray-50"
+//                   >
+//                     {/* Candidate */}
+//                     <td className="px-6 py-4">
+//                       <div className="font-medium">
+//                         {app.fullName}
+//                       </div>
+//                     </td>
+
+//                     {/* Contact */}
+//                     <td className="px-6 py-4">
+//                       <div className="text-sm">
+//                         {app.email}
+//                       </div>
+
+//                       <div className="text-sm text-gray-500">
+//                         {app.phone}
+//                       </div>
+//                     </td>
+
+//                     {/* Position */}
+//                     <td className="px-6 py-4">
+//                       <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+//                         {app.position}
+//                       </span>
+//                     </td>
+
+//                     {/* Experience */}
+//                     <td className="px-6 py-4 text-sm">
+//                       {app.experience || "N/A"}
+//                     </td>
+
+//                     {/* Resume */}
+//                     <td className="px-6 py-4">
+//                       {app.resumeUrl ? (
+//                         <a
+//                           href={app.resumeUrl.startsWith("http") ? app.resumeUrl : `${API_BASE_URL}/${app.resumeUrl.replace(/\\/g, '/').replace(/^\/?/, '')}`}
+//                           target="_blank"
+//                           rel="noreferrer"
+//                           className="flex items-center gap-1 text-blue-600 hover:underline"
+//                         >
+//                           <FileText className="w-4 h-4" />
+//                           View Resume
+//                         </a>
+//                       ) : (
+//                         <span className="flex items-center text-red-500 text-xs max-w-[200px] leading-tight">
+//                           <XCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+//                           Resume file not found. It may have been deleted or not uploaded correctly.
+//                         </span>
+//                       )}
+//                     </td>
+
+//                     {/* Actions */}
+//                     <td className="px-6 py-4">
+//                       <div className="flex justify-center gap-2">
+//                         {app.status === "shortlisted" ? (
+//                           <span className="flex items-center text-green-600 text-sm font-medium">
+//                             <CheckCircle className="w-4 h-4 mr-1" />
+//                             Shortlisted
+//                           </span>
+//                         ) : app.status === "rejected" ? (
+//                           <span className="flex items-center text-red-600 text-sm font-medium">
+//                             <XCircle className="w-4 h-4 mr-1" />
+//                             Rejected
+//                           </span>
+//                         ) : (
+//                           <>
+//                             <button
+//                               disabled={
+//                                 processingId === app._id
+//                               }
+//                               onClick={() =>
+//                                 handleApplicationStatus(
+//                                   app,
+//                                   "yes"
+//                                 )
+//                               }
+//                               className="px-3 py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50"
+//                             >
+//                               Accept
+//                             </button>
+
+//                             <button
+//                               disabled={
+//                                 processingId === app._id
+//                               }
+//                               onClick={() =>
+//                                 handleApplicationStatus(
+//                                   app,
+//                                   "no"
+//                                 )
+//                               }
+//                               className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+//                             >
+//                               Reject
+//                             </button>
+//                           </>
+//                         )}
+//                       </div>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ApplicationsManagement;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -409,12 +709,16 @@ import {
 const ApplicationsManagement = () => {
   const API_BASE_URL =
     import.meta.env.VITE_API_URL || "http://localhost:9077";
-    //  import.meta.env.VITE_API_URL || 'https://node.encleadus.cloud';
+  //  import.meta.env.VITE_API_URL || 'https://node.encleadus.cloud';
 
   const [applications, setApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processingId, setProcessingId] = useState(null);
+
+  // ================= PAGINATION =================
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // ================= FETCH APPLICATIONS =================
   const APPLICATIONS_ENDPOINT = `${API_BASE_URL}/api/applications`;
@@ -424,7 +728,10 @@ const ApplicationsManagement = () => {
     try {
       setIsLoading(true);
 
-      const response = await axios.get(APPLICATIONS_ENDPOINT);
+      const response = await axios.get(
+        `${APPLICATIONS_ENDPOINT}?page=${page}&limit=10`
+      );
+
       const responseData = response.data;
 
       const applicationsFromResponse = Array.isArray(responseData)
@@ -436,6 +743,10 @@ const ApplicationsManagement = () => {
         : [];
 
       setApplications(applicationsFromResponse);
+
+      // PAGINATION
+      setTotalPages(responseData.totalPages || 1);
+
       setError(null);
     } catch (err) {
       console.error(err);
@@ -451,7 +762,7 @@ const ApplicationsManagement = () => {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [page]);
 
   // ================= HANDLE STATUS =================
   const handleApplicationStatus = async (
@@ -533,145 +844,172 @@ const ApplicationsManagement = () => {
             No applications found
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-4 text-left">
-                    Candidate
-                  </th>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left">
+                      Candidate
+                    </th>
 
-                  <th className="px-6 py-4 text-left">
-                    Contact
-                  </th>
+                    <th className="px-6 py-4 text-left">
+                      Contact
+                    </th>
 
-                  <th className="px-6 py-4 text-left">
-                    Position
-                  </th>
+                    <th className="px-6 py-4 text-left">
+                      Position
+                    </th>
 
-                  <th className="px-6 py-4 text-left">
-                    Experience
-                  </th>
+                    <th className="px-6 py-4 text-left">
+                      Experience
+                    </th>
 
-                  <th className="px-6 py-4 text-left">
-                    Resume
-                  </th>
+                    <th className="px-6 py-4 text-left">
+                      Resume
+                    </th>
 
-                  <th className="px-6 py-4 text-center">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {applications.map((app) => (
-                  <tr
-                    key={app._id}
-                    className="border-t hover:bg-gray-50"
-                  >
-                    {/* Candidate */}
-                    <td className="px-6 py-4">
-                      <div className="font-medium">
-                        {app.fullName}
-                      </div>
-                    </td>
-
-                    {/* Contact */}
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        {app.email}
-                      </div>
-
-                      <div className="text-sm text-gray-500">
-                        {app.phone}
-                      </div>
-                    </td>
-
-                    {/* Position */}
-                    <td className="px-6 py-4">
-                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
-                        {app.position}
-                      </span>
-                    </td>
-
-                    {/* Experience */}
-                    <td className="px-6 py-4 text-sm">
-                      {app.experience || "N/A"}
-                    </td>
-
-                    {/* Resume */}
-                    <td className="px-6 py-4">
-                      {app.resumeUrl ? (
-                        <a
-                          href={app.resumeUrl.startsWith("http") ? app.resumeUrl : `${API_BASE_URL}/${app.resumeUrl.replace(/\\/g, '/').replace(/^\/?/, '')}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 text-blue-600 hover:underline"
-                        >
-                          <FileText className="w-4 h-4" />
-                          View Resume
-                        </a>
-                      ) : (
-                        <span className="flex items-center text-red-500 text-xs max-w-[200px] leading-tight">
-                          <XCircle className="w-3 h-3 mr-1 flex-shrink-0" />
-                          Resume file not found. It may have been deleted or not uploaded correctly.
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-2">
-                        {app.status === "shortlisted" ? (
-                          <span className="flex items-center text-green-600 text-sm font-medium">
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Shortlisted
-                          </span>
-                        ) : app.status === "rejected" ? (
-                          <span className="flex items-center text-red-600 text-sm font-medium">
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Rejected
-                          </span>
-                        ) : (
-                          <>
-                            <button
-                              disabled={
-                                processingId === app._id
-                              }
-                              onClick={() =>
-                                handleApplicationStatus(
-                                  app,
-                                  "yes"
-                                )
-                              }
-                              className="px-3 py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50"
-                            >
-                              Accept
-                            </button>
-
-                            <button
-                              disabled={
-                                processingId === app._id
-                              }
-                              onClick={() =>
-                                handleApplicationStatus(
-                                  app,
-                                  "no"
-                                )
-                              }
-                              className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
+                    <th className="px-6 py-4 text-center">
+                      Status
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody>
+                  {applications.map((app) => (
+                    <tr
+                      key={app._id}
+                      className="border-t hover:bg-gray-50"
+                    >
+                      {/* Candidate */}
+                      <td className="px-6 py-4">
+                        <div className="font-medium">
+                          {app.fullName}
+                        </div>
+                      </td>
+
+                      {/* Contact */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          {app.email}
+                        </div>
+
+                        <div className="text-sm text-gray-500">
+                          {app.phone}
+                        </div>
+                      </td>
+
+                      {/* Position */}
+                      <td className="px-6 py-4">
+                        <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                          {app.position}
+                        </span>
+                      </td>
+
+                      {/* Experience */}
+                      <td className="px-6 py-4 text-sm">
+                        {app.experience || "N/A"}
+                      </td>
+
+                      {/* Resume */}
+                      <td className="px-6 py-4">
+                        {app.resumeUrl ? (
+                          <a
+                            href={app.resumeUrl.startsWith("http") ? app.resumeUrl : `${API_BASE_URL}/${app.resumeUrl.replace(/\\/g, '/').replace(/^\/?/, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline"
+                          >
+                            <FileText className="w-4 h-4" />
+                            View Resume
+                          </a>
+                        ) : (
+                          <span className="flex items-center text-red-500 text-xs max-w-[200px] leading-tight">
+                            <XCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                            Resume file not found. It may have been deleted or not uploaded correctly.
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-2">
+                          {app.status === "shortlisted" ? (
+                            <span className="flex items-center text-green-600 text-sm font-medium">
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Shortlisted
+                            </span>
+                          ) : app.status === "rejected" ? (
+                            <span className="flex items-center text-red-600 text-sm font-medium">
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Rejected
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                disabled={
+                                  processingId === app._id
+                                }
+                                onClick={() =>
+                                  handleApplicationStatus(
+                                    app,
+                                    "yes"
+                                  )
+                                }
+                                className="px-3 py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50"
+                              >
+                                Accept
+                              </button>
+
+                              <button
+                                disabled={
+                                  processingId === app._id
+                                }
+                                onClick={() =>
+                                  handleApplicationStatus(
+                                    app,
+                                    "no"
+                                  )
+                                }
+                                className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ================= PAGINATION ================= */}
+            <div className="flex justify-center items-center gap-4 p-4 border-t">
+
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+              >
+                Previous
+              </button>
+
+              <span className="font-medium">
+                Page {page} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPages}
+                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+              >
+                Next
+              </button>
+
+            </div>
+          </>
         )}
       </div>
     </div>
